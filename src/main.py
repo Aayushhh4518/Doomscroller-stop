@@ -1,22 +1,41 @@
-from video_controller import VideoController
-import time
-
-video = VideoController()
-
-print("Opening dog video...")
-
-video.play_video()
-# pyrefly: ignore [missing-import]
 import cv2
+
 from config import CAMERA_INDEX, WINDOW_NAME
+from face_tracker import FaceTracker
 
 cap = cv2.VideoCapture(CAMERA_INDEX)
 
-while True:
-    ret, frame = cap.read()
+tracker = FaceTracker()
 
-    if not ret:
+while True:
+    success, frame = cap.read()
+
+    if not success:
         break
+
+    results = tracker.detect_face(frame)
+    print(results.detections)
+
+    if results.detections:
+        cv2.putText(
+            frame,
+            "FACE DETECTED",
+            (20, 40),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            1,
+            (0, 255, 0),
+            2
+        )
+    else:
+        cv2.putText(
+            frame,
+            "NO FACE",
+            (20, 40),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            1,
+            (0, 0, 255),
+            2
+        )
 
     cv2.imshow(WINDOW_NAME, frame)
 
@@ -25,6 +44,3 @@ while True:
 
 cap.release()
 cv2.destroyAllWindows()
-time.sleep(5)
-
-print("Test complete")
