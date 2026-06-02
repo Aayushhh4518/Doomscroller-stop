@@ -1,8 +1,13 @@
-VIDEO_PATH = r"assets\dog.mp4"
+import os
+
+BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+
+VIDEO_PATH = os.path.join(
+    BASE_DIR,
+    "assets",
+    "dog.mp4"
+)
 
 CAMERA_INDEX = 0
-
-FRAMES_TO_PLAY = 2
-FRAMES_TO_STOP = 35
 
 WINDOW_NAME = "DoomScroller Stop"

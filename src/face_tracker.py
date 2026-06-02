@@ -15,7 +15,10 @@ class FaceTracker:
 
     def get_landmarks(self, frame):
         rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        return self.face_mesh.process(rgb)
+
+        results = self.face_mesh.process(rgb)
+
+        return results
 
     def get_eye_position(self, landmarks):
         left_iris = landmarks[468]
@@ -27,7 +30,6 @@ class FaceTracker:
 
     def get_direction(self, landmarks):
 
-        # ```
         iris = self.get_eye_position(landmarks)
 
         x = iris["x"]
@@ -44,6 +46,31 @@ class FaceTracker:
 
         elif x > 62:
             return "RIGHT"
+
+        else:
+            return "CENTER"
+
+    def get_head_direction(self, landmarks, img_w, img_h):
+
+        nose = landmarks[1]
+
+        left_face = landmarks[234]
+        right_face = landmarks[454]
+
+        nose_x = nose.x * img_w
+
+        left_x = left_face.x * img_w
+        right_x = right_face.x * img_w
+
+        face_center = (left_x + right_x) / 2
+
+        diff = nose_x - face_center
+
+        if diff > 25:
+            return "RIGHT"
+
+        elif diff < -25:
+            return "LEFT"
 
         else:
             return "CENTER"
