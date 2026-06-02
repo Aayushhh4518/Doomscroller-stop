@@ -1,13 +1,16 @@
 import cv2
-from video_controller import VideoController
+import numpy as np
 
-from config import CAMERA_INDEX, WINDOW_NAME
+from audio_controller import AudioController
+from config import AUDIO_PATH, CAMERA_INDEX, WINDOW_NAME, VIDEO_PATH
 from face_tracker import FaceTracker
+from video_panel import VideoPanel
 
 cap = cv2.VideoCapture(CAMERA_INDEX)
 
 tracker = FaceTracker()
-video = VideoController()
+dog_video = VideoPanel(VIDEO_PATH)
+audio = AudioController(AUDIO_PATH)
 
 focused_frames = 0
 distracted_frames = 0
@@ -19,11 +22,12 @@ dog_active = False
 
 while True:
 
-    # ```
     success, frame = cap.read()
 
     if not success:
         break
+
+    frame = cv2.resize(frame, (640, 480))
 
     results = tracker.get_landmarks(frame)
 
@@ -38,10 +42,12 @@ while True:
             frame.shape[1],
             frame.shape[0]
         )
+
         focused = (
             eye_direction == "CENTER"
             and head_direction == "CENTER"
         )
+
         if focused:
 
             focused_frames += 1
@@ -51,22 +57,17 @@ while True:
 
             distracted_frames += 1
             focused_frames = 0
-        if (
-            distracted_frames >= DOG_TRIGGER
-            and not dog_active
-        ):
 
-            video.play_video()
+        if distracted_frames >= DOG_TRIGGER:
+            if not dog_active:
+                audio.play()
+            dog_active=True    
 
-            dog_active = True
-        if (
-            focused_frames >= DOG_STOP
-            and dog_active
-        ):
-
-            video.stop_video()
-
+        if focused_frames >= DOG_STOP:
+            if dog_active:
+                audio.stop()
             dog_active = False
+
         status = "FOCUSED" if focused else "DISTRACTED"
 
         color = (0, 255, 0) if focused else (0, 0, 255)
@@ -91,29 +92,9 @@ while True:
             2
         )
 
-        iris = tracker.get_eye_position(face_landmarks)
-
-        cv2.putText(
-            frame,
-            f"X: {iris['x']:.2f}",
-            (20, 150),
-            cv2.FONT_HERSHEY_SIMPLEX,
-            0.8,
-            (255, 255, 255),
-            2
-        )
-
-        cv2.putText(
-            frame,
-            f"Y: {iris['y']:.2f}",
-            (20, 190),
-            cv2.FONT_HERSHEY_SIMPLEX,
-            0.8,
-            (255, 255, 255),
-            2
-        )
-
     else:
+
+        dog_active = True
 
         cv2.putText(
             frame,
@@ -125,11 +106,30 @@ while True:
             2
         )
 
-    cv2.imshow(WINDOW_NAME, frame)
+    if dog_active:
+
+        dog_frame = dog_video.get_frame()
+
+    else:
+
+        dog_frame = np.zeros((480, 640, 3), dtype=np.uint8)
+
+        cv2.putText(
+            dog_frame,
+            "FOCUSED",
+            (180, 240),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            2,
+            (0, 255, 0),
+            3
+        )
+
+    combined = np.hstack((dog_frame, frame))
+
+    cv2.imshow(WINDOW_NAME, combined)
 
     if cv2.waitKey(1) & 0xFF == 27:
         break
-    # ```
 
 cap.release()
 cv2.destroyAllWindows()
