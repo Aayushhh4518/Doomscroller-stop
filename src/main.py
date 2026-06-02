@@ -10,6 +10,7 @@ tracker = FaceTracker()
 while True:
     success, frame = cap.read()
 
+    # ```
     if not success:
         break
 
@@ -17,19 +18,71 @@ while True:
 
     if results.multi_face_landmarks:
 
+        face_landmarks = results.multi_face_landmarks[0].landmark
+
+        direction = tracker.get_direction(face_landmarks)
+
+        iris = tracker.get_eye_position(face_landmarks)
+
         cv2.putText(
             frame,
-            "FACE MESH ACTIVE",
-            (20, 50),
+            f"X: {iris['x']:.2f}",
+            (20, 90),
             cv2.FONT_HERSHEY_SIMPLEX,
-            1,
-            (0, 255, 0),
+            0.8,
+            (255, 255, 0),
             2
         )
 
-        for face_landmarks in results.multi_face_landmarks:
+        cv2.putText(
+            frame,
+            f"Y: {iris['y']:.2f}",
+            (20, 130),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            0.8,
+            (255, 255, 0),
+            2
+        )
 
-            for landmark in face_landmarks.landmark:
+        iris_y = tracker.get_eye_position(face_landmarks)
+
+        looking_down = direction == "DOWN"
+        if looking_down:
+
+            cv2.putText(
+                frame,
+                f"DIRECTION: {direction}",
+                (20, 50),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                1,
+                (0, 255, 0),
+                2
+            )
+        else:
+
+            cv2.putText(
+                frame,
+                "FOCUSED",
+                (20, 50),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                1,
+                (0, 255, 0),
+                2
+            )
+
+        cv2.putText(
+            frame,
+            f"Iris Y: {iris_y['y']:.2f}",
+            (20, 90),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            0.8,
+            (255, 255, 0),
+            2
+        )
+
+        for face in results.multi_face_landmarks:
+
+            for landmark in face.landmark:
 
                 x = int(landmark.x * frame.shape[1])
                 y = int(landmark.y * frame.shape[0])
@@ -52,6 +105,7 @@ while True:
 
     if cv2.waitKey(1) & 0xFF == 27:
         break
+    # ```
 
 cap.release()
 cv2.destroyAllWindows()
