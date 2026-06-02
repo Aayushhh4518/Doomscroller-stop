@@ -1,15 +1,12 @@
 import os
 from config import VIDEO_PATH
 
-
 class VideoController:
     def __init__(self):
-        self.is_playing = False
+        pass
 
     def play_video(self):
-        if not self.is_playing:
+        try:
             os.startfile(VIDEO_PATH)
-            self.is_playing = True
-
-    def stop_video(self):
-        self.is_playing = False
+        except Exception as e:
+            print(f"Video Error: {e}")

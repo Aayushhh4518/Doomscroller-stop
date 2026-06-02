@@ -13,24 +13,35 @@ while True:
     if not success:
         break
 
-    results = tracker.detect_face(frame)
-    print(results.detections)
+    results = tracker.get_landmarks(frame)
 
-    if results.detections:
+    if results.multi_face_landmarks:
+
         cv2.putText(
             frame,
-            "FACE DETECTED",
-            (20, 40),
+            "FACE MESH ACTIVE",
+            (20, 50),
             cv2.FONT_HERSHEY_SIMPLEX,
             1,
             (0, 255, 0),
             2
         )
+
+        for face_landmarks in results.multi_face_landmarks:
+
+            for landmark in face_landmarks.landmark:
+
+                x = int(landmark.x * frame.shape[1])
+                y = int(landmark.y * frame.shape[0])
+
+                cv2.circle(frame, (x, y), 1, (0, 255, 0), -1)
+
     else:
+
         cv2.putText(
             frame,
             "NO FACE",
-            (20, 40),
+            (20, 50),
             cv2.FONT_HERSHEY_SIMPLEX,
             1,
             (0, 0, 255),
