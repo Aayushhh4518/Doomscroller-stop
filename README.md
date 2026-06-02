@@ -125,13 +125,17 @@ User Returns Focus
 
 ---
 
-## 🖥 Demo
+## Overview
 
-### Focused State
+Problem Statement
 
-### Distracted State
+Features
 
-### Live Demonstration
+Architecture
+
+Detection Pipeline
+
+Workflow
 
 ---
 
