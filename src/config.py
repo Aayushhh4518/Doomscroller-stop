@@ -1,4 +1,4 @@
-VIDEO_PATH = r"assets\dog copy.mp4"
+VIDEO_PATH = r"assets\dog.mp4"
 
 CAMERA_INDEX = 0
 
